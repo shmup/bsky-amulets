@@ -12,6 +12,8 @@ github.com/beorn7/perks v1.0.1 h1:VlbKKnNfV8bJzeqoa4cOKqO6bYr3WgKZxO8Z16+hsOM=
 github.com/beorn7/perks v1.0.1/go.mod h1:G2ZrVWU2WbWT9wwq4/hrbKbnv/1ERSJQ0ibhJ6rlkpw=
 github.com/bluesky-social/indigo v0.0.0-20241202163206-72b4acb7a8f6 h1:M5wEFNELWZMVQ6m2tb156E/gS5yq4717M73UJbg8NaI=
 github.com/bluesky-social/indigo v0.0.0-20241202163206-72b4acb7a8f6/go.mod h1:js1fRbLG7qefpSROXq3pyQxf3t72qY8s2amStisJD8U=
+github.com/buger/goterm v1.0.4 h1:Z9YvGmOih81P0FbVtEYTFF6YsSgxSUKEhf/f9bTMXbY=
+github.com/buger/goterm v1.0.4/go.mod h1:HiFWV3xnkolgrBV3mY8m0X0Pumt4zg4QhbdOzQtB8tE=
 github.com/carlmjohnson/versioninfo v0.22.5 h1:O00sjOLUAFxYQjlN/bzYTuZiS0y6fWDQjMRvwtKgwwc=
 github.com/carlmjohnson/versioninfo v0.22.5/go.mod h1:QT9mph3wcVfISUKd0i9sZfVrPviHuSF+cUtLjm2WSf8=
 github.com/cespare/xxhash/v2 v2.2.0 h1:DC2CZ1Ep5Y4k3ZQ899DldepgrayRUGE6BBZ/cd9Cj44=
@@ -277,6 +279,10 @@ github.com/shmup/amulet.go v0.0.0-20241203201059-ead0870a48a2 h1:UqZCTxDWRJ2ZUG2
 github.com/shmup/amulet.go v0.0.0-20241203201059-ead0870a48a2/go.mod h1:7Q7yDXcNRrJHJSmKRWAvk2Yqqu5qwBHGFn9O/2S/3qw=
 github.com/shmup/bluesky-firehose.go v0.0.0-20241203195903-212559e50d76 h1:hRcTXuxqAOAiMxDNTncdL7nOubKH99QKIu7BEUHe5YI=
 github.com/shmup/bluesky-firehose.go v0.0.0-20241203195903-212559e50d76/go.mod h1:jTXIEoqY7FOMQvoGYlZRYNyFxkkgVbdpYQWM/A559ZI=
+github.com/shmup/bluesky-firehose.go v0.0.0-20241203210422-5a90642b236e h1:vXmwDCsrRnhl/eIiXs2fsYitr4SFArKySjJ+diPj9S0=
+github.com/shmup/bluesky-firehose.go v0.0.0-20241203210422-5a90642b236e/go.mod h1:jTXIEoqY7FOMQvoGYlZRYNyFxkkgVbdpYQWM/A559ZI=
+github.com/shmup/bluesky-firehose.go v0.0.0-20241203211310-ea24624fc563 h1:ctqcroWaEbpvsFaK2cAPl1HBLaNJWJCciTrLtmuIz1U=
+github.com/shmup/bluesky-firehose.go v0.0.0-20241203211310-ea24624fc563/go.mod h1:jTXIEoqY7FOMQvoGYlZRYNyFxkkgVbdpYQWM/A559ZI=
 github.com/shurcooL/sanitized_anchor_name v1.0.0/go.mod h1:1NzhyTcUVG4SuEtjjoZeVRXNmyL/1OwPU0+IJeTBvfc=
 github.com/smartystreets/assertions v1.2.0 h1:42S6lae5dvLc7BrLu/0ugRtcFVjoJNMC/N3yZFZkDFs=
 github.com/smartystreets/assertions v1.2.0/go.mod h1:tcbTF8ujkAEcZ8TElKY+i30BzYlVhC/LOxJk7iOWnoo=
@@ -363,6 +369,7 @@ golang.org/x/sys v0.0.0-20190412213103-97732733099d/go.mod h1:h1NjWce9XRLGQEsW7w
 golang.org/x/sys v0.0.0-20200930185726-fdedc70b468f/go.mod h1:h1NjWce9XRLGQEsW7wpKNCjG9DtNlClVuFLEZdDNbEs=
 golang.org/x/sys v0.0.0-20201119102817-f84b799fce68/go.mod h1:h1NjWce9XRLGQEsW7wpKNCjG9DtNlClVuFLEZdDNbEs=
 golang.org/x/sys v0.0.0-20210330210617-4fbd30eecc44/go.mod h1:h1NjWce9XRLGQEsW7wpKNCjG9DtNlClVuFLEZdDNbEs=
+golang.org/x/sys v0.0.0-20210331175145-43e1dd70ce54/go.mod h1:h1NjWce9XRLGQEsW7wpKNCjG9DtNlClVuFLEZdDNbEs=
 golang.org/x/sys v0.0.0-20210510120138-977fb7262007/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=
 golang.org/x/sys v0.0.0-20210630005230-0f9fa26af87c/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=
 golang.org/x/sys v0.5.0/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=
