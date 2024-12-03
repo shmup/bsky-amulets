@@ -3,17 +3,16 @@ module github.com/shmup/bsky-amulets
 go 1.23.3
 
 require (
-	github.com/bluesky-social/indigo v0.0.0-20241202163206-72b4acb7a8f6
-	github.com/joho/godotenv v1.5.1
+	github.com/buger/goterm v1.0.4
 	github.com/shmup/amulet.go v0.0.0-20241203201059-ead0870a48a2
-	github.com/shmup/bluesky-firehose.go v0.0.0-20241203212630-243205902b99
+	github.com/shmup/bluesky-firehose.go v0.0.0-20241203230518-99591215dd5b
 )
 
 require (
 	github.com/DataDog/zstd v1.4.5 // indirect
 	github.com/RussellLuo/slidingwindow v0.0.0-20200528002341-535bb99d338b // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
-	github.com/buger/goterm v1.0.4 // indirect
+	github.com/bluesky-social/indigo v0.0.0-20241202163206-72b4acb7a8f6 // indirect
 	github.com/carlmjohnson/versioninfo v0.22.5 // indirect
 	github.com/cespare/xxhash/v2 v2.2.0 // indirect
 	github.com/cockroachdb/errors v1.11.3 // indirect
