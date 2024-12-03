@@ -15,6 +15,8 @@ type AmuletCollector struct {
 	startTime   time.Time
 	postCount   int
 	amuletCount int
+	lastOpCount int // Add these
+	lastCheck   time.Time
 }
 
 type AmuletEntry struct {
@@ -26,7 +28,15 @@ type AmuletEntry struct {
 func NewAmuletCollector() *AmuletCollector {
 	return &AmuletCollector{
 		startTime: time.Now(),
+		lastCheck: time.Now(),
 	}
+}
+func (ac *AmuletCollector) calculateOPS() float64 {
+	duration := time.Since(ac.lastCheck).Seconds()
+	ops := float64(ac.postCount-ac.lastOpCount) / duration
+	ac.lastOpCount = ac.postCount
+	ac.lastCheck = time.Now()
+	return ops
 }
 
 func (ac *AmuletCollector) HandlePost(text string) error {
@@ -44,7 +54,9 @@ func (ac *AmuletCollector) StartUI() {
 		for {
 			tm.Clear()
 			tm.MoveCursor(1, 1)
-			tm.Printf("Posts Processed: %d | Amulets Found: %d | Running for: %s\n",
+			ops := ac.calculateOPS()
+			tm.Printf("Posts/sec: %.2f | Posts: %d | Amulets: %d | Runtime: %s\n",
+				ops,
 				ac.postCount,
 				ac.amuletCount,
 				time.Since(ac.startTime).Round(time.Second))

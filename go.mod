@@ -4,7 +4,7 @@ go 1.23.3
 
 require (
 	github.com/buger/goterm v1.0.4
-	github.com/shmup/amulet.go v0.0.0-20241203201059-ead0870a48a2
+	github.com/shmup/amulet.go v0.0.0-20241203231550-fbf4575fedfc
 	github.com/shmup/bluesky-firehose.go v0.0.0-20241203230518-99591215dd5b
 )
 
