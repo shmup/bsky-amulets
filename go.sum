@@ -283,6 +283,8 @@ github.com/shmup/bluesky-firehose.go v0.0.0-20241203210422-5a90642b236e h1:vXmwD
 github.com/shmup/bluesky-firehose.go v0.0.0-20241203210422-5a90642b236e/go.mod h1:jTXIEoqY7FOMQvoGYlZRYNyFxkkgVbdpYQWM/A559ZI=
 github.com/shmup/bluesky-firehose.go v0.0.0-20241203211310-ea24624fc563 h1:ctqcroWaEbpvsFaK2cAPl1HBLaNJWJCciTrLtmuIz1U=
 github.com/shmup/bluesky-firehose.go v0.0.0-20241203211310-ea24624fc563/go.mod h1:jTXIEoqY7FOMQvoGYlZRYNyFxkkgVbdpYQWM/A559ZI=
+github.com/shmup/bluesky-firehose.go v0.0.0-20241203212630-243205902b99 h1:NpKn2Y+WE20b1S4OIog5YVuTumSbBQHhcok/qfhGdHY=
+github.com/shmup/bluesky-firehose.go v0.0.0-20241203212630-243205902b99/go.mod h1:jTXIEoqY7FOMQvoGYlZRYNyFxkkgVbdpYQWM/A559ZI=
 github.com/shurcooL/sanitized_anchor_name v1.0.0/go.mod h1:1NzhyTcUVG4SuEtjjoZeVRXNmyL/1OwPU0+IJeTBvfc=
 github.com/smartystreets/assertions v1.2.0 h1:42S6lae5dvLc7BrLu/0ugRtcFVjoJNMC/N3yZFZkDFs=
 github.com/smartystreets/assertions v1.2.0/go.mod h1:tcbTF8ujkAEcZ8TElKY+i30BzYlVhC/LOxJk7iOWnoo=

@@ -6,7 +6,7 @@ require (
 	github.com/bluesky-social/indigo v0.0.0-20241202163206-72b4acb7a8f6
 	github.com/joho/godotenv v1.5.1
 	github.com/shmup/amulet.go v0.0.0-20241203201059-ead0870a48a2
-	github.com/shmup/bluesky-firehose.go v0.0.0-20241203211310-ea24624fc563
+	github.com/shmup/bluesky-firehose.go v0.0.0-20241203212630-243205902b99
 )
 
 require (
