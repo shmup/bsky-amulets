@@ -2,16 +2,42 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"log"
 	"os"
 	"time"
 
-	tm "github.com/buger/goterm"
 	"github.com/joho/godotenv"
+
+	tm "github.com/buger/goterm"
 	amulet "github.com/shmup/amulet.go"
 	bsky "github.com/shmup/bluesky-firehose.go"
 )
+
+type AmuletEntry struct {
+	Text      string    `json:"text"`
+	Rarity    int       `json:"rarity"`
+	Timestamp time.Time `json:"timestamp"`
+}
+
+func appendToLog(entry AmuletEntry) error {
+	f, err := os.OpenFile("amulets.json", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	jsonEntry, err := json.Marshal(entry)
+	if err != nil {
+		return err
+	}
+
+	if _, err := f.WriteString(string(jsonEntry) + "\n"); err != nil {
+		return err
+	}
+	return nil
+}
 
 func main() {
 	startTime := time.Now()
@@ -28,7 +54,6 @@ func main() {
 		log.Fatal(err)
 	}
 
-	// Update status line every second
 	go func() {
 		for {
 			tm.Clear()
@@ -46,6 +71,17 @@ func main() {
 		postCount++
 		if isAmulet, rarity := amulet.IsAmulet(text); isAmulet {
 			amuletCount++
+
+			entry := AmuletEntry{
+				Text:      text,
+				Rarity:    rarity,
+				Timestamp: time.Now(),
+			}
+
+			if err := appendToLog(entry); err != nil {
+				log.Printf("Failed to log amulet: %v", err)
+			}
+
 			fmt.Printf("\n%s", text)
 			fmt.Printf("Is Amulet: %t Rarity: %d\n", isAmulet, rarity)
 		}
