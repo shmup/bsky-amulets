@@ -8,6 +8,7 @@ import (
 	"sort"
 	"time"
 
+	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
 	amulet "github.com/shmup/amulet.go"
 )
@@ -18,6 +19,7 @@ type Model struct {
 	maxEntries *int
 	minRarity  *int
 	startTime  time.Time
+	viewport   viewport.Model
 }
 
 type Stats struct {
@@ -41,7 +43,10 @@ type HistoryMsg struct {
 }
 
 func NewModel(maxEntries, minRarity *int, loadHistory *bool) Model {
+	v := viewport.New(80, 20)
+
 	m := Model{
+		viewport:   v,
 		maxEntries: maxEntries,
 		minRarity:  minRarity,
 		startTime:  time.Now(),
@@ -62,6 +67,9 @@ func (m Model) Init() tea.Cmd {
 
 func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
+	case tea.WindowSizeMsg:
+		m.viewport.Width = msg.Width
+		m.viewport.Height = msg.Height
 	case tea.KeyMsg:
 		switch msg.String() {
 		case "q", "ctrl+c":
@@ -98,7 +106,8 @@ func (m Model) View() string {
 		output += fmt.Sprintf("%s: %s\n", rarityLabel, e.Text)
 	}
 
-	return output
+	m.viewport.SetContent(output)
+	return m.viewport.View()
 }
 
 func (m Model) logEntry(entry Entry) {
