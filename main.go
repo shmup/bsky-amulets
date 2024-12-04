@@ -36,22 +36,42 @@ func main() {
 func startFirehose(ctx context.Context, p *tea.Program) {
 	backoff := time.Second
 	for {
-		client, err := firehose.New("wss://bsky.network/xrpc/com.atproto.sync.subscribeRepos")
-		if err != nil {
-			time.Sleep(backoff)
-			backoff *= 2
-			continue
-		}
-		backoff = time.Second
+		select {
+		case <-ctx.Done():
+			return
+		default:
+			client, err := firehose.New("wss://bsky.network/xrpc/com.atproto.sync.subscribeRepos")
+			if err != nil {
+				time.Sleep(backoff)
+				backoff *= 2
+				continue
+			}
+			backoff = time.Second
 
-		if err := client.ConsumeJetstream(
-			context.Background(),
-			func(post firehose.JetstreamPost) error {
-				p.Send(ProcessMsg{Text: post.Commit.Record.Text})
-				return nil
-			},
-		); err != nil {
-			continue
+			streamCtx, cancel := context.WithCancel(ctx)
+			go func() {
+				<-ctx.Done()
+				cancel()
+			}()
+
+			if err := client.ConsumeJetstream(
+				streamCtx,
+				func(post firehose.JetstreamPost) error {
+					select {
+					case <-streamCtx.Done():
+						return context.Canceled
+					default:
+						p.Send(ProcessMsg{Text: post.Commit.Record.Text})
+						return nil
+					}
+				},
+			); err != nil {
+				cancel()
+				if ctx.Err() != nil {
+					return
+				}
+				continue
+			}
 		}
 	}
 }
