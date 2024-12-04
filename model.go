@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"os"
 	"sort"
 	"time"
@@ -13,12 +14,14 @@ import (
 )
 
 type Model struct {
-	stats      Stats
-	entries    []Entry
-	maxEntries *int
-	minRarity  *int
-	startTime  time.Time
-	viewport   viewport.Model
+	stats       Stats
+	entries     []Entry
+	maxEntries  *int
+	minRarity   *int
+	startTime   time.Time
+	viewport    viewport.Model
+	writeBuffer chan Entry
+	done        chan struct{}
 }
 
 type Stats struct {
@@ -46,11 +49,15 @@ func NewModel(maxEntries, minRarity *int, loadHistory *bool) Model {
 	v := viewport.New(80, 20)
 
 	m := Model{
-		viewport:   v,
-		maxEntries: maxEntries,
-		minRarity:  minRarity,
-		startTime:  time.Now(),
+		viewport:    v,
+		maxEntries:  maxEntries,
+		minRarity:   minRarity,
+		startTime:   time.Now(),
+		writeBuffer: make(chan Entry, 100),
+		done:        make(chan struct{}),
 	}
+
+	go m.bufferWriter()
 
 	if *loadHistory {
 		entries := loadHistoryFromFile(*minRarity, *maxEntries)
@@ -60,6 +67,25 @@ func NewModel(maxEntries, minRarity *int, loadHistory *bool) Model {
 	}
 
 	return m
+}
+
+func (m *Model) bufferWriter() {
+	f, err := os.OpenFile("amulets.json", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		log.Printf("Failed to open file: %v", err)
+		return
+	}
+	defer f.Close()
+
+	for {
+		select {
+		case entry := <-m.writeBuffer:
+			data, _ := json.Marshal(entry)
+			f.Write(append(data, '\n'))
+		case <-m.done:
+			return
+		}
+	}
 }
 
 func (m Model) Init() tea.Cmd {
@@ -137,10 +163,7 @@ func (m Model) View() string {
 }
 
 func (m Model) logEntry(entry Entry) {
-	data, _ := json.Marshal(entry)
-	f, _ := os.OpenFile("amulets.json", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
-	defer f.Close()
-	f.Write(append(data, '\n'))
+	m.writeBuffer <- entry
 }
 
 func loadHistoryFromFile(minRarity, maxEntries int) []Entry {
