@@ -194,7 +194,7 @@ func (m Model) View() string {
 		Height(m.viewport.Height + 1) // +1 for stats bar
 
 	return containerStyle.Render(fmt.Sprintf("%s\n%s",
-		m.renderStats(),
+		m.renderStats(m.minRarity),
 		m.viewport.View()))
 }
 
