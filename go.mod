@@ -3,6 +3,7 @@ module github.com/shmup/bsky-amulets
 go 1.23.3
 
 require (
+	github.com/charmbracelet/bubbles v0.20.0
 	github.com/charmbracelet/bubbletea v1.2.4
 	github.com/shmup/amulet.go v0.0.0-20241203231550-fbf4575fedfc
 	github.com/shmup/bluesky-firehose.go v0.0.0-20241203234044-89f5f27fd811
@@ -16,7 +17,6 @@ require (
 	github.com/bluesky-social/indigo v0.0.0-20241202163206-72b4acb7a8f6 // indirect
 	github.com/carlmjohnson/versioninfo v0.22.5 // indirect
 	github.com/cespare/xxhash/v2 v2.2.0 // indirect
-	github.com/charmbracelet/bubbles v0.20.0 // indirect
 	github.com/charmbracelet/lipgloss v1.0.0 // indirect
 	github.com/charmbracelet/x/ansi v0.4.5 // indirect
 	github.com/charmbracelet/x/term v0.2.1 // indirect
