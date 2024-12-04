@@ -12,7 +12,7 @@ import (
 	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
-	amulet "github.com/shmup/amulet.go"
+	amulet "github.com/shmup/amulet.go/fast"
 )
 
 type Model struct {

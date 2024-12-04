@@ -300,8 +300,8 @@ github.com/rogpeppe/go-internal v1.9.0/go.mod h1:WtVeX8xhTBvf0smdhujwtBcq4Qrzq/f
 github.com/rogpeppe/go-internal v1.10.0 h1:TMyTOH3F/DB16zRVcYyreMH6GnZZrwQVAoYjRBZyWFQ=
 github.com/rogpeppe/go-internal v1.10.0/go.mod h1:UQnix2H7Ngw/k4C5ijL5+65zddjncjaFoBhdsK/akog=
 github.com/russross/blackfriday/v2 v2.0.1/go.mod h1:+Rmxgy9KzJVeS9/2gXHxylqXiyQDYRxCVz55jmeOWTM=
-github.com/shmup/amulet.go v0.0.0-20241204195224-afb7e890dca5 h1:iLpobdXtzupPTWdHmNZl+8GPzDXQfctZw4q9yXu0JIA=
-github.com/shmup/amulet.go v0.0.0-20241204195224-afb7e890dca5/go.mod h1:7Q7yDXcNRrJHJSmKRWAvk2Yqqu5qwBHGFn9O/2S/3qw=
+github.com/shmup/amulet.go v0.0.0-20241204231011-4d8ee2ee8613 h1:WsQCGa4mgr17MKWhuXhB5yPuz3A0n96as/AjN7dkMjA=
+github.com/shmup/amulet.go v0.0.0-20241204231011-4d8ee2ee8613/go.mod h1:7Q7yDXcNRrJHJSmKRWAvk2Yqqu5qwBHGFn9O/2S/3qw=
 github.com/shmup/bluesky-firehose.go v0.0.0-20241203234044-89f5f27fd811 h1:kJJAZ6PtgVDC018yJD95/UXn2kWsZo6PavjaSDlTjBA=
 github.com/shmup/bluesky-firehose.go v0.0.0-20241203234044-89f5f27fd811/go.mod h1:GVdxLg5DOYKwMkGm5fKHf/lypryrv+iBFWDSqjwYMBs=
 github.com/shurcooL/sanitized_anchor_name v1.0.0/go.mod h1:1NzhyTcUVG4SuEtjjoZeVRXNmyL/1OwPU0+IJeTBvfc=
