@@ -20,6 +20,7 @@ type Model struct {
 	entries     []Entry
 	maxEntries  *int
 	minRarity   *int
+	newestFirst bool
 	startTime   time.Time
 	viewport    viewport.Model
 	writeBuffer chan Entry
@@ -141,6 +142,12 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case "G":
 			m.viewport.GotoBottom()
 			return m, nil
+		case "r":
+			m.newestFirst = !m.newestFirst
+			sort.Slice(m.entries, func(i, j int) bool {
+				return m.entries[i].Time.After(m.entries[j].Time) == m.newestFirst
+			})
+			return m, nil
 		case "q", "ctrl+c":
 			return m, tea.Quit
 		}
@@ -170,10 +177,9 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.stats.Amulets++
 				m.stats.TotalAmulets++
 				entry := Entry{Text: msg.Text, Rarity: rarity, Time: time.Now()}
-				m.logEntry(entry)
-				m.entries = append([]Entry{entry}, m.entries...)
+				m.entries = append(m.entries, entry)
 				if len(m.entries) > *m.maxEntries {
-					m.entries = m.entries[:*m.maxEntries]
+					m.entries = m.entries[len(m.entries)-*m.maxEntries:]
 				}
 			}
 		}
@@ -220,7 +226,7 @@ func loadHistoryFromFile(minRarity, maxEntries int) []Entry {
 	}
 
 	sort.Slice(entries, func(i, j int) bool {
-		return entries[i].Time.After(entries[j].Time)
+		return entries[i].Time.Before(entries[j].Time)
 	})
 
 	if len(entries) > maxEntries {
