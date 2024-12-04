@@ -8,19 +8,14 @@ import (
 	firehose "github.com/shmup/bluesky-firehose.go"
 )
 
-var client *firehose.Firehose
-
 func main() {
-	client, _ = firehose.New("wss://bsky.network/xrpc/com.atproto.sync.subscribeRepos")
-
-	collector := NewAmuletCollector(runtime.NumCPU())
-	collector.startWorkers()
-	collector.StartUI()
+	client, _ := firehose.New("wss://bsky.network/xrpc/com.atproto.sync.subscribeRepos")
+	collector := NewCollector(runtime.NumCPU())
 
 	client.ConsumeJetstream(
 		context.Background(),
 		func(post firehose.JetstreamPost) error {
-			collector.HandlePost(post.Commit.Record.Text)
+			collector.Process(post.Commit.Record.Text)
 			return nil
 		},
 		func(err error) {
