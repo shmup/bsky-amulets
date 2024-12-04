@@ -29,6 +29,7 @@ type Stats struct {
 	Amulets      int
 	TotalAmulets int
 	Rate         float64
+	recentPosts  []time.Time
 }
 
 type Entry struct {
@@ -118,7 +119,25 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, tea.Quit
 		}
 	case ProcessMsg:
+		now := time.Now()
 		m.stats.Posts++
+		m.stats.recentPosts = append(m.stats.recentPosts, now)
+
+		cutoff := now.Add(-time.Minute)
+		for i, t := range m.stats.recentPosts {
+			if t.After(cutoff) {
+				m.stats.recentPosts = m.stats.recentPosts[i:]
+				break
+			}
+		}
+
+		runtime := time.Since(m.startTime).Seconds()
+		if runtime < 60 {
+			m.stats.Rate = float64(m.stats.Posts) / runtime
+		} else {
+			m.stats.Rate = float64(len(m.stats.recentPosts)) / 60.0
+		}
+
 		if isAmulet, rarity := amulet.IsAmulet(msg.Text); isAmulet {
 			if rarity >= *m.minRarity+3 {
 				m.stats.Amulets++
@@ -142,9 +161,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 func (m Model) renderStats() string {
 	runtime := time.Since(m.startTime).Round(time.Second)
-	rate := float64(m.stats.Posts) / runtime.Seconds()
 	return fmt.Sprintf("SPS: %.2f | Skeets: %d | Found: %d | Total: %d | Runtime: %s\n",
-		rate, m.stats.Posts, m.stats.Amulets, m.stats.TotalAmulets, runtime)
+		m.stats.Rate, m.stats.Posts, m.stats.Amulets, m.stats.TotalAmulets, runtime)
 }
 
 func (m Model) renderEntries() string {
