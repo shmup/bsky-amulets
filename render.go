@@ -65,7 +65,7 @@ func (m Model) renderEntries() string {
 		Padding(0, 0)
 
 	for _, e := range m.entries {
-		symbol := getRaritySymbol(e.Rarity - 3)
+		symbol := getRaritySymbol(e.Rarity)
 		styledText := lipgloss.NewStyle().
 			Foreground(lipgloss.Color("252")).
 			Render(e.Text)

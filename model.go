@@ -179,7 +179,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 
 		if isAmulet, rarity := amulet.IsAmulet(msg.Text); isAmulet {
-			if rarity >= *m.minRarity+3 {
+			if rarity >= *m.minRarity {
 				m.stats.Amulets++
 				m.stats.TotalAmulets++
 				entry := Entry{Text: msg.Text, Rarity: rarity, Time: time.Now()}
@@ -226,7 +226,7 @@ func loadHistoryFromFile(minRarity, maxEntries int) []Entry {
 		if err := decoder.Decode(&entry); err != nil {
 			continue
 		}
-		if entry.Rarity >= minRarity+3 {
+		if entry.Rarity >= minRarity {
 			entries = append(entries, entry)
 		}
 	}

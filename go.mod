@@ -7,7 +7,7 @@ require (
 	github.com/charmbracelet/bubbletea v1.2.4
 	github.com/charmbracelet/lipgloss v1.0.0
 	github.com/joho/godotenv v1.5.1
-	github.com/shmup/amulet.go v0.0.0-20241204231011-4d8ee2ee8613
+	github.com/shmup/amulet.go v0.0.0-20241204233940-95ecf5929dfe
 	github.com/shmup/bluesky-firehose.go v0.0.0-20241203234044-89f5f27fd811
 )
 
