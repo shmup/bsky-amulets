@@ -53,7 +53,6 @@ func NewModel(maxEntries, minRarity *int, loadHistory *bool) Model {
 
 	if *loadHistory {
 		entries := loadHistoryFromFile(*minRarity, *maxEntries)
-		m.stats.Amulets = len(entries)
 		m.entries = entries
 	}
 
@@ -92,8 +91,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case ProcessMsg:
 		m.stats.Posts++
 		if isAmulet, rarity := amulet.IsAmulet(msg.Text); isAmulet {
-			m.stats.Amulets++
 			if rarity >= *m.minRarity+3 {
+				m.stats.Amulets++
 				entry := Entry{Text: msg.Text, Rarity: rarity, Time: time.Now()}
 				m.logEntry(entry)
 				m.entries = append([]Entry{entry}, m.entries...)
@@ -114,7 +113,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 func (m Model) renderStats() string {
 	runtime := time.Since(m.startTime).Round(time.Second)
 	rate := float64(m.stats.Posts) / runtime.Seconds()
-	return fmt.Sprintf("Posts/sec: %.2f | Posts: %d | Amulets: %d | Runtime: %s\n",
+	return fmt.Sprintf("SPS: %.2f | Skeets: %d | Found: %d | Runtime: %s\n",
 		rate, m.stats.Posts, m.stats.Amulets, runtime)
 }
 
