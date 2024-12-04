@@ -4,22 +4,58 @@ import (
 	"context"
 	"flag"
 	"log"
+	"os"
+	"strconv"
 	"time"
 
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/joho/godotenv"
 	firehose "github.com/shmup/bluesky-firehose.go"
 )
 
+type Config struct {
+	MinRarity  int
+	MaxEntries int
+}
+
+var defaultConfig = Config{
+	MinRarity:  1,
+	MaxEntries: 1000,
+}
+
+func loadConfig() Config {
+	if err := godotenv.Load(); err != nil {
+		log.Printf("No .env file found, using defaults")
+	}
+
+	config := defaultConfig
+
+	if minRarity := os.Getenv("MIN_RARITY"); minRarity != "" {
+		if val, err := strconv.Atoi(minRarity); err == nil {
+			config.MinRarity = val
+		}
+	}
+
+	if maxEntries := os.Getenv("MAX_ENTRIES"); maxEntries != "" {
+		if val, err := strconv.Atoi(maxEntries); err == nil {
+			config.MaxEntries = val
+		}
+	}
+
+	return config
+}
+
 func main() {
-	minRarity := flag.Int("r", 1, "Minimum rarity (1-7)")
-	maxEntries := flag.Int("n", 1000, "Maximum entries")
-	loadHistory := flag.Bool("h", true, "Load history")
+	config := loadConfig()
+
+	minRarity := flag.Int("r", config.MinRarity, "Minimum rarity (1-7)")
+	maxEntries := flag.Int("n", config.MaxEntries, "Maximum entries")
 	flag.Parse()
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	m := NewModel(maxEntries, minRarity, loadHistory)
+	m := NewModel(maxEntries, minRarity)
 	p := tea.NewProgram(m, tea.WithAltScreen())
 
 	go startFirehose(ctx, p)
@@ -28,9 +64,9 @@ func main() {
 		log.Fatal(err)
 	}
 
-	cancel()                // stop firehose
-	close(m.done)           // stop file writer
-	time.Sleep(time.Second) // give goroutines time to clean up
+	cancel()
+	close(m.done)
+	time.Sleep(time.Second)
 }
 
 func startFirehose(ctx context.Context, p *tea.Program) {

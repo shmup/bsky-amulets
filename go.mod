@@ -6,6 +6,7 @@ require (
 	github.com/charmbracelet/bubbles v0.20.0
 	github.com/charmbracelet/bubbletea v1.2.4
 	github.com/charmbracelet/lipgloss v1.0.0
+	github.com/joho/godotenv v1.5.1
 	github.com/shmup/amulet.go v0.0.0-20241204195224-afb7e890dca5
 	github.com/shmup/bluesky-firehose.go v0.0.0-20241203234044-89f5f27fd811
 )

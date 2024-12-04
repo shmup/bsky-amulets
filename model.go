@@ -48,7 +48,7 @@ type HistoryMsg struct {
 	Entries []Entry
 }
 
-func NewModel(maxEntries, minRarity *int, loadHistory *bool) Model {
+func NewModel(maxEntries, minRarity *int) Model {
 	v := viewport.New(80, 20)
 
 	m := Model{
@@ -62,12 +62,10 @@ func NewModel(maxEntries, minRarity *int, loadHistory *bool) Model {
 
 	go m.bufferWriter()
 
-	if *loadHistory {
-		entries := loadHistoryFromFile(*minRarity, *maxEntries)
-		m.stats.Amulets = 0
-		m.stats.TotalAmulets = len(entries)
-		m.entries = entries
-	}
+	entries := loadHistoryFromFile(*minRarity, *maxEntries)
+	m.stats.Amulets = 0
+	m.stats.TotalAmulets = len(entries)
+	m.entries = entries
 
 	return m
 }
