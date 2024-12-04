@@ -10,9 +10,9 @@ import (
 )
 
 func main() {
-	minRarity := flag.Int("r", 1, "Minimum rarity (1-7)")
-	maxEntries := flag.Int("n", 100, "Maximum entries")
-	loadHistory := flag.Bool("h", false, "Load history")
+	minRarity := flag.Int("r", 2, "Minimum rarity (1-7)")
+	maxEntries := flag.Int("n", 30, "Maximum entries")
+	loadHistory := flag.Bool("h", true, "Load history")
 	flag.Parse()
 
 	p := tea.NewProgram(NewModel(maxEntries, minRarity, loadHistory))
