@@ -7,10 +7,12 @@ import (
 	"log"
 	"os"
 	"sort"
+	"strings"
 	"time"
 
 	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/lipgloss"
 	amulet "github.com/shmup/amulet.go"
 )
 
@@ -194,23 +196,64 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 func (m Model) renderStats() string {
 	runtime := time.Since(m.startTime).Round(time.Second)
-	return fmt.Sprintf("SPS: %.2f | Skeets: %d | Found: %d | Total: %d | Runtime: %s\n",
-		m.stats.Rate, m.stats.Posts, m.stats.Amulets, m.stats.TotalAmulets, runtime)
+
+	baseStyle := lipgloss.NewStyle().
+		Background(lipgloss.Color("21")).
+		Width(m.viewport.Width).
+		Padding(0, 0)
+
+	valueStyle := lipgloss.NewStyle()
+
+	separator := lipgloss.NewStyle().
+		SetString(" │ ").
+		String()
+
+	stats := baseStyle.Render(fmt.Sprintf("SPS: %s%sSkeets: %s%sFound: %s%sTotal: %s%sRuntime: %s",
+		valueStyle.Render(fmt.Sprintf("%6.2f", m.stats.Rate)), separator,
+		valueStyle.Render(fmt.Sprintf("%3d", m.stats.Posts)), separator,
+		valueStyle.Render(fmt.Sprintf("%d", m.stats.Amulets)), separator,
+		valueStyle.Render(fmt.Sprintf("%d", m.stats.TotalAmulets)), separator,
+		valueStyle.Render(runtime.String())))
+
+	return stats
 }
 
 func (m Model) renderEntries() string {
-	var output string
-	for _, e := range m.entries {
-		rarityLabel := []string{"C", "U", "R", "E", "L", "M", "?"}[e.Rarity-4]
-		output += fmt.Sprintf("%s: %s\n", rarityLabel, e.Text)
+	var output strings.Builder
+
+	normalRow := lipgloss.NewStyle().
+		Foreground(lipgloss.Color("252")).
+		Background(lipgloss.Color("236")).
+		Width(m.viewport.Width).
+		Padding(0, 0)
+
+	alternateRow := lipgloss.NewStyle().
+		Foreground(lipgloss.Color("252")).
+		Background(lipgloss.Color("234")).
+		Width(m.viewport.Width).
+		Padding(0, 0)
+
+	for i, e := range m.entries {
+		style := normalRow
+		if i%2 == 0 {
+			style = alternateRow
+		}
+
+		coloredText := style.Render(e.Text)
+		output.WriteString(coloredText + "\n")
 	}
-	return output
+
+	return output.String()
 }
 
 func (m Model) View() string {
-	return fmt.Sprintf("%s\n%s",
+	containerStyle := lipgloss.NewStyle().
+		Background(lipgloss.Color("0")).
+		Height(m.viewport.Height + 1) // +1 for stats bar
+
+	return containerStyle.Render(fmt.Sprintf("%s\n%s",
 		m.renderStats(),
-		m.viewport.View())
+		m.viewport.View()))
 }
 
 func (m Model) logEntry(entry Entry) {
