@@ -16,14 +16,24 @@ func main() {
 	loadHistory := flag.Bool("h", true, "Load history")
 	flag.Parse()
 
-	p := tea.NewProgram(NewModel(maxEntries, minRarity, loadHistory))
-	go startFirehose(p)
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	m := NewModel(maxEntries, minRarity, loadHistory)
+	p := tea.NewProgram(m)
+
+	go startFirehose(ctx, p)
+
 	if _, err := p.Run(); err != nil {
 		log.Fatal(err)
 	}
+
+	cancel()                // stop firehose
+	close(m.done)           // stop file writer
+	time.Sleep(time.Second) // give goroutines time to clean up
 }
 
-func startFirehose(p *tea.Program) {
+func startFirehose(ctx context.Context, p *tea.Program) {
 	backoff := time.Second
 	for {
 		client, err := firehose.New("wss://bsky.network/xrpc/com.atproto.sync.subscribeRepos")
