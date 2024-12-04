@@ -19,20 +19,10 @@ func getRaritySymbol(minRarity int) string {
 		7: "252", // unknown
 	}
 
-	raritySymbols := map[int]string{
-		1: "C",
-		2: "U",
-		3: "R",
-		4: "E",
-		5: "L",
-		6: "M",
-		7: "?",
-	}
-
 	if color, exists := rarityColors[minRarity]; exists {
 		return lipgloss.NewStyle().
 			Foreground(lipgloss.Color(color)).
-			Render(raritySymbols[minRarity])
+			Render("•")
 	}
 	return "?"
 }
@@ -60,19 +50,30 @@ func (m Model) renderStats() string {
 func (m Model) renderEntries() string {
 	var output strings.Builder
 
-	rowStyle := lipgloss.NewStyle().
-		Width(m.viewport.Width).
-		Padding(0, 0)
+	timeStyle := lipgloss.NewStyle().
+		Foreground(lipgloss.Color("241"))
+
+	textStyle := lipgloss.NewStyle().
+		Foreground(lipgloss.Color("252")).
+		Width(m.viewport.Width - 11)
 
 	for _, e := range m.entries {
 		symbol := getRaritySymbol(e.Rarity)
-		styledText := lipgloss.NewStyle().
-			Foreground(lipgloss.Color("252")).
-			Render(e.Text)
+		timeStr := e.Time.Format("15:04:05")
+		formattedTime := timeStyle.Render(timeStr)
+		wrappedText := textStyle.Render(e.Text)
 
-		line := fmt.Sprintf("%s %s", symbol, styledText)
-		coloredLine := rowStyle.Render(line)
-		output.WriteString(coloredLine + "\n")
+		lines := strings.Split(wrappedText, "\n")
+
+		firstLine := fmt.Sprintf("%s %s %s", formattedTime, symbol, lines[0])
+		output.WriteString(firstLine + "\n")
+
+		if len(lines) > 1 {
+			padding := strings.Repeat(" ", 13) // 11 + 2 extra spaces
+			for _, line := range lines[1:] {
+				output.WriteString(padding + line + "\n")
+			}
+		}
 	}
 
 	return output.String()
