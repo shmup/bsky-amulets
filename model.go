@@ -22,9 +22,10 @@ type Model struct {
 }
 
 type Stats struct {
-	Posts   int
-	Amulets int
-	Rate    float64
+	Posts        int
+	Amulets      int
+	TotalAmulets int
+	Rate         float64
 }
 
 type Entry struct {
@@ -53,6 +54,8 @@ func NewModel(maxEntries, minRarity *int, loadHistory *bool) Model {
 
 	if *loadHistory {
 		entries := loadHistoryFromFile(*minRarity, *maxEntries)
+		m.stats.Amulets = 0
+		m.stats.TotalAmulets = len(entries)
 		m.entries = entries
 	}
 
@@ -93,6 +96,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		if isAmulet, rarity := amulet.IsAmulet(msg.Text); isAmulet {
 			if rarity >= *m.minRarity+3 {
 				m.stats.Amulets++
+				m.stats.TotalAmulets++
 				entry := Entry{Text: msg.Text, Rarity: rarity, Time: time.Now()}
 				m.logEntry(entry)
 				m.entries = append([]Entry{entry}, m.entries...)
@@ -113,8 +117,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 func (m Model) renderStats() string {
 	runtime := time.Since(m.startTime).Round(time.Second)
 	rate := float64(m.stats.Posts) / runtime.Seconds()
-	return fmt.Sprintf("SPS: %.2f | Skeets: %d | Found: %d | Runtime: %s\n",
-		rate, m.stats.Posts, m.stats.Amulets, runtime)
+	return fmt.Sprintf("SPS: %.2f | Skeets: %d | Found: %d | Total: %d | Runtime: %s\n",
+		rate, m.stats.Posts, m.stats.Amulets, m.stats.TotalAmulets, runtime)
 }
 
 func (m Model) renderEntries() string {
