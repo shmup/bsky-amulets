@@ -40,11 +40,7 @@ func getRaritySymbol(minRarity int) string {
 func (m Model) renderStats() string {
 	runtime := time.Since(m.startTime).Round(time.Second)
 
-	baseStyle := lipgloss.NewStyle().
-		Background(lipgloss.Color("18")).
-		Width(m.viewport.Width).
-		Padding(0, 0)
-
+	baseStyle := lipgloss.NewStyle()
 	valueStyle := lipgloss.NewStyle()
 
 	separator := lipgloss.NewStyle().
