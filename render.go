@@ -8,7 +8,7 @@ import (
 	"github.com/charmbracelet/lipgloss"
 )
 
-func getRarityCircle(minRarity int) string {
+func getRaritySymbol(minRarity int) string {
 	rarityColors := map[int]string{
 		1: "173", // copper/bronze
 		2: "247", // silver
@@ -16,23 +16,32 @@ func getRarityCircle(minRarity int) string {
 		4: "199", // epic (purple)
 		5: "39",  // legendary (green)
 		6: "201", // mythic (pink)
+		7: "252", // unknown
 	}
 
-	// default to question mark for unknown rarities
+	raritySymbols := map[int]string{
+		1: "C",
+		2: "U",
+		3: "R",
+		4: "E",
+		5: "L",
+		6: "M",
+		7: "?",
+	}
+
 	if color, exists := rarityColors[minRarity]; exists {
 		return lipgloss.NewStyle().
-			SetString("●").
 			Foreground(lipgloss.Color(color)).
-			String()
+			Render(raritySymbols[minRarity])
 	}
 	return "?"
 }
 
-func (m Model) renderStats(minRarity *int) string {
+func (m Model) renderStats() string {
 	runtime := time.Since(m.startTime).Round(time.Second)
 
 	baseStyle := lipgloss.NewStyle().
-		Background(lipgloss.Color("21")).
+		Background(lipgloss.Color("18")).
 		Width(m.viewport.Width).
 		Padding(0, 0)
 
@@ -42,15 +51,12 @@ func (m Model) renderStats(minRarity *int) string {
 		SetString(" │ ").
 		String()
 
-	rarityIndicator := getRarityCircle(*minRarity)
-
-	stats := baseStyle.Render(fmt.Sprintf("SPS: %s%sSkeets: %s%sNew: %s%sTotal: %s%s%s%s%s",
+	stats := baseStyle.Render(fmt.Sprintf("SPS: %s%sSkeets: %s%sNew: %s%sTotal: %s%s%s%s",
 		valueStyle.Render(fmt.Sprintf("%6.2f", m.stats.Rate)), separator,
 		valueStyle.Render(fmt.Sprintf("%3d", m.stats.Posts)), separator,
 		valueStyle.Render(fmt.Sprintf("%d", m.stats.Amulets)), separator,
 		valueStyle.Render(fmt.Sprintf("%d", m.stats.TotalAmulets)), separator,
-		valueStyle.Render(runtime.String()),
-		separator, rarityIndicator))
+		valueStyle.Render(runtime.String()), separator))
 
 	return stats
 }
@@ -58,26 +64,19 @@ func (m Model) renderStats(minRarity *int) string {
 func (m Model) renderEntries() string {
 	var output strings.Builder
 
-	normalRow := lipgloss.NewStyle().
-		Foreground(lipgloss.Color("252")).
-		Background(lipgloss.Color("236")).
+	rowStyle := lipgloss.NewStyle().
 		Width(m.viewport.Width).
 		Padding(0, 0)
 
-	alternateRow := lipgloss.NewStyle().
-		Foreground(lipgloss.Color("252")).
-		Background(lipgloss.Color("234")).
-		Width(m.viewport.Width).
-		Padding(0, 0)
+	for _, e := range m.entries {
+		symbol := getRaritySymbol(e.Rarity - 3)
+		styledText := lipgloss.NewStyle().
+			Foreground(lipgloss.Color("252")).
+			Render(e.Text)
 
-	for i, e := range m.entries {
-		style := normalRow
-		if i%2 == 0 {
-			style = alternateRow
-		}
-
-		coloredText := style.Render(e.Text)
-		output.WriteString(coloredText + "\n")
+		line := fmt.Sprintf("%s %s", symbol, styledText)
+		coloredLine := rowStyle.Render(line)
+		output.WriteString(coloredLine + "\n")
 	}
 
 	return output.String()
