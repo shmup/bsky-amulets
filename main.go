@@ -20,7 +20,7 @@ func main() {
 	defer cancel()
 
 	m := NewModel(maxEntries, minRarity, loadHistory)
-	p := tea.NewProgram(m)
+	p := tea.NewProgram(m, tea.WithAltScreen())
 
 	go startFirehose(ctx, p)
 
