@@ -4,6 +4,7 @@ import (
 	"context"
 	"flag"
 	"log"
+	"time"
 
 	tea "github.com/charmbracelet/bubbletea"
 	firehose "github.com/shmup/bluesky-firehose.go"
@@ -23,15 +24,24 @@ func main() {
 }
 
 func startFirehose(p *tea.Program) {
-	client, _ := firehose.New("wss://bsky.network/xrpc/com.atproto.sync.subscribeRepos")
-	client.ConsumeJetstream(
-		context.Background(),
-		func(post firehose.JetstreamPost) error {
-			p.Send(ProcessMsg{Text: post.Commit.Record.Text})
-			return nil
-		},
-		func(err error) {
-			client, _ = firehose.New("wss://bsky.network/xrpc/com.atproto.sync.subscribeRepos")
-		},
-	)
+	backoff := time.Second
+	for {
+		client, err := firehose.New("wss://bsky.network/xrpc/com.atproto.sync.subscribeRepos")
+		if err != nil {
+			time.Sleep(backoff)
+			backoff *= 2
+			continue
+		}
+		backoff = time.Second
+
+		if err := client.ConsumeJetstream(
+			context.Background(),
+			func(post firehose.JetstreamPost) error {
+				p.Send(ProcessMsg{Text: post.Commit.Record.Text})
+				return nil
+			},
+		); err != nil {
+			continue
+		}
+	}
 }
