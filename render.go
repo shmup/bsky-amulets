@@ -51,12 +51,12 @@ func (m Model) renderStats() string {
 		SetString(" │ ").
 		String()
 
-	stats := baseStyle.Render(fmt.Sprintf("SPS: %s%sSkeets: %s%sNew: %s%sTotal: %s%s%s%s",
+	stats := baseStyle.Render(fmt.Sprintf("SPS: %s%sSkeets: %s%sNew: %s%sTotal: %s%s%s",
 		valueStyle.Render(fmt.Sprintf("%6.2f", m.stats.Rate)), separator,
 		valueStyle.Render(fmt.Sprintf("%3d", m.stats.Posts)), separator,
 		valueStyle.Render(fmt.Sprintf("%d", m.stats.Amulets)), separator,
 		valueStyle.Render(fmt.Sprintf("%d", m.stats.TotalAmulets)), separator,
-		valueStyle.Render(runtime.String()), separator))
+		valueStyle.Render(runtime.String())))
 
 	return stats
 }
