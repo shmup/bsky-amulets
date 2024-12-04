@@ -4,28 +4,33 @@ import (
 	"context"
 	"flag"
 	"log"
-	"runtime"
 
+	tea "github.com/charmbracelet/bubbletea"
 	firehose "github.com/shmup/bluesky-firehose.go"
 )
 
 func main() {
-	minRarity := flag.Int("r", 1, "Minimum rarity to display (1-7)")
-	maxEntries := flag.Int("n", 100, "Maximum number of entries to display")
-	loadHistory := flag.Bool("h", false, "Load history from amulets.json")
+	minRarity := flag.Int("r", 1, "Minimum rarity (1-7)")
+	maxEntries := flag.Int("n", 100, "Maximum entries")
+	loadHistory := flag.Bool("h", false, "Load history")
 	flag.Parse()
 
-	client, _ := firehose.New("wss://bsky.network/xrpc/com.atproto.sync.subscribeRepos")
-	collector := NewCollector(runtime.NumCPU(), *minRarity, *maxEntries, *loadHistory)
+	p := tea.NewProgram(NewModel(maxEntries, minRarity, loadHistory))
+	go startFirehose(p)
+	if _, err := p.Run(); err != nil {
+		log.Fatal(err)
+	}
+}
 
+func startFirehose(p *tea.Program) {
+	client, _ := firehose.New("wss://bsky.network/xrpc/com.atproto.sync.subscribeRepos")
 	client.ConsumeJetstream(
 		context.Background(),
 		func(post firehose.JetstreamPost) error {
-			collector.Process(post.Commit.Record.Text)
+			p.Send(ProcessMsg{Text: post.Commit.Record.Text})
 			return nil
 		},
 		func(err error) {
-			log.Printf("WebSocket error: %v", err)
 			client, _ = firehose.New("wss://bsky.network/xrpc/com.atproto.sync.subscribeRepos")
 		},
 	)
