@@ -69,7 +69,7 @@ func (m Model) renderEntries() string {
 		output.WriteString(firstLine + "\n")
 
 		if len(lines) > 1 {
-			padding := strings.Repeat(" ", 13) // 11 + 2 extra spaces
+			padding := strings.Repeat(" ", 11)
 			for _, line := range lines[1:] {
 				output.WriteString(padding + line + "\n")
 			}
