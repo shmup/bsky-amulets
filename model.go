@@ -142,6 +142,12 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case "G":
 			m.viewport.GotoBottom()
 			return m, nil
+		case "1", "2", "3", "4", "5", "6", "7":
+			newRarity := int(msg.String()[0] - '0') // convert char to int
+			*m.minRarity = newRarity
+			m.entries = loadHistoryFromFile(*m.minRarity, *m.maxEntries)
+			m.stats.TotalAmulets = len(m.entries)
+			return m, nil
 		case "r":
 			m.newestFirst = !m.newestFirst
 			sort.Slice(m.entries, func(i, j int) bool {
