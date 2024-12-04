@@ -1,4 +1,3 @@
-// model.go
 package main
 
 import (
@@ -68,10 +67,25 @@ func (m Model) Init() tea.Cmd {
 func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
+		headerHeight := 2 // Stats header height
+
 		m.viewport.Width = msg.Width
-		m.viewport.Height = msg.Height
+		m.viewport.Height = msg.Height - headerHeight
+
 	case tea.KeyMsg:
 		switch msg.String() {
+		case "j":
+			m.viewport.LineDown(1)
+			return m, nil
+		case "k":
+			m.viewport.LineUp(1)
+			return m, nil
+		case "g":
+			m.viewport.GotoTop()
+			return m, nil
+		case "G":
+			m.viewport.GotoBottom()
+			return m, nil
 		case "q", "ctrl+c":
 			return m, tea.Quit
 		}
@@ -91,23 +105,32 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case HistoryMsg:
 		m.entries = msg.Entries
 	}
+
+	m.viewport.SetContent(m.renderEntries())
+
 	return m, nil
 }
 
-func (m Model) View() string {
+func (m Model) renderStats() string {
 	runtime := time.Since(m.startTime).Round(time.Second)
 	rate := float64(m.stats.Posts) / runtime.Seconds()
-
-	output := fmt.Sprintf("Posts/sec: %.2f | Posts: %d | Amulets: %d | Runtime: %s\n\n",
+	return fmt.Sprintf("Posts/sec: %.2f | Posts: %d | Amulets: %d | Runtime: %s\n",
 		rate, m.stats.Posts, m.stats.Amulets, runtime)
+}
 
+func (m Model) renderEntries() string {
+	var output string
 	for _, e := range m.entries {
 		rarityLabel := []string{"C", "U", "R", "E", "L", "M", "?"}[e.Rarity-4]
 		output += fmt.Sprintf("%s: %s\n", rarityLabel, e.Text)
 	}
+	return output
+}
 
-	m.viewport.SetContent(output)
-	return m.viewport.View()
+func (m Model) View() string {
+	return fmt.Sprintf("%s\n%s",
+		m.renderStats(),
+		m.viewport.View())
 }
 
 func (m Model) logEntry(entry Entry) {
