@@ -49,6 +49,7 @@ func NewModel(maxEntries, minRarity *int, loadHistory *bool) Model {
 
 	if *loadHistory {
 		entries := loadHistoryFromFile(*minRarity, *maxEntries)
+		m.stats.Amulets = len(entries)
 		m.entries = entries
 	}
 
