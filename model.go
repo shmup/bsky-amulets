@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -29,7 +30,8 @@ type Stats struct {
 	Amulets      int
 	TotalAmulets int
 	Rate         float64
-	recentPosts  []time.Time
+	recentPosts  [60]time.Time
+	postIndex    int
 }
 
 type Entry struct {
@@ -54,7 +56,7 @@ func NewModel(maxEntries, minRarity *int, loadHistory *bool) Model {
 		maxEntries:  maxEntries,
 		minRarity:   minRarity,
 		startTime:   time.Now(),
-		writeBuffer: make(chan Entry, 100),
+		writeBuffer: make(chan Entry, 1000),
 		done:        make(chan struct{}),
 	}
 
@@ -78,15 +80,41 @@ func (m *Model) bufferWriter() {
 	}
 	defer f.Close()
 
+	writer := bufio.NewWriterSize(f, 32*1024)
+	defer writer.Flush()
+
+	batch := make([]Entry, 0, 100)
+	ticker := time.NewTicker(time.Second)
+	defer ticker.Stop()
+
 	for {
 		select {
 		case entry := <-m.writeBuffer:
-			data, _ := json.Marshal(entry)
-			f.Write(append(data, '\n'))
+			batch = append(batch, entry)
+			if len(batch) >= 100 {
+				writeBatch(writer, batch)
+				batch = batch[:0]
+			}
+		case <-ticker.C:
+			if len(batch) > 0 {
+				writeBatch(writer, batch)
+				batch = batch[:0]
+			}
 		case <-m.done:
+			if len(batch) > 0 {
+				writeBatch(writer, batch)
+			}
 			return
 		}
 	}
+}
+
+func writeBatch(writer *bufio.Writer, entries []Entry) {
+	for _, entry := range entries {
+		data, _ := json.Marshal(entry)
+		writer.Write(append(data, '\n'))
+	}
+	writer.Flush()
 }
 
 func (m Model) Init() tea.Cmd {
@@ -121,21 +149,26 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case ProcessMsg:
 		now := time.Now()
 		m.stats.Posts++
-		m.stats.recentPosts = append(m.stats.recentPosts, now)
 
-		cutoff := now.Add(-time.Minute)
-		for i, t := range m.stats.recentPosts {
-			if t.After(cutoff) {
-				m.stats.recentPosts = m.stats.recentPosts[i:]
-				break
-			}
-		}
+		// Update ring buffer
+		m.stats.recentPosts[m.stats.postIndex] = now
+		m.stats.postIndex = (m.stats.postIndex + 1) % 60
 
+		// Calculate rate based on runtime or ring buffer
 		runtime := time.Since(m.startTime).Seconds()
 		if runtime < 60 {
+			// For first minute, use total posts / runtime
 			m.stats.Rate = float64(m.stats.Posts) / runtime
 		} else {
-			m.stats.Rate = float64(len(m.stats.recentPosts)) / 60.0
+			// After first minute, count posts in last 60 seconds
+			count := 0
+			cutoff := now.Add(-time.Minute)
+			for _, t := range m.stats.recentPosts {
+				if !t.IsZero() && t.After(cutoff) {
+					count++
+				}
+			}
+			m.stats.Rate = float64(count)
 		}
 
 		if isAmulet, rarity := amulet.IsAmulet(msg.Text); isAmulet {
