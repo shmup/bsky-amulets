@@ -28,12 +28,11 @@ type Model struct {
 }
 
 type Stats struct {
-	Posts        int
-	Amulets      int
-	TotalAmulets int
-	Rate         float64
-	recentPosts  [60]time.Time
-	postIndex    int
+	Posts         int
+	Amulets       int
+	TotalAmulets  int
+	Rate          float64
+	lastPostTimes []time.Time
 }
 
 type Entry struct {
@@ -126,7 +125,7 @@ func (m Model) Init() tea.Cmd {
 func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
-		headerHeight := 2 // Stats header height
+		headerHeight := 2 // stats header height
 
 		m.viewport.Width = msg.Width
 		m.viewport.Height = msg.Height - headerHeight
@@ -151,26 +150,22 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case ProcessMsg:
 		now := time.Now()
 		m.stats.Posts++
+		m.stats.lastPostTimes = append(m.stats.lastPostTimes, now)
 
-		// Update ring buffer
-		m.stats.recentPosts[m.stats.postIndex] = now
-		m.stats.postIndex = (m.stats.postIndex + 1) % 60
-
-		// Calculate rate based on runtime or ring buffer
-		runtime := time.Since(m.startTime).Seconds()
-		if runtime < 60 {
-			// For first minute, use total posts / runtime
-			m.stats.Rate = float64(m.stats.Posts) / runtime
+		timeSinceStart := now.Sub(m.startTime)
+		if timeSinceStart < time.Minute {
+			// during first minute calculate rate based on time since start
+			m.stats.Rate = float64(len(m.stats.lastPostTimes)) / timeSinceStart.Seconds()
 		} else {
-			// After first minute, count posts in last 60 seconds
-			count := 0
+			// after first minute, use rolling window
 			cutoff := now.Add(-time.Minute)
-			for _, t := range m.stats.recentPosts {
-				if !t.IsZero() && t.After(cutoff) {
-					count++
+			for i, t := range m.stats.lastPostTimes {
+				if t.After(cutoff) {
+					m.stats.lastPostTimes = m.stats.lastPostTimes[i:]
+					break
 				}
 			}
-			m.stats.Rate = float64(count)
+			m.stats.Rate = float64(len(m.stats.lastPostTimes)) / 60.0
 		}
 
 		if isAmulet, rarity := amulet.IsAmulet(msg.Text); isAmulet {
