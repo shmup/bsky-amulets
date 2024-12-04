@@ -11,7 +11,7 @@ import (
 )
 
 func main() {
-	minRarity := flag.Int("r", 3, "Minimum rarity (1-7)")
+	minRarity := flag.Int("r", 1, "Minimum rarity (1-7)")
 	maxEntries := flag.Int("n", 1000, "Maximum entries")
 	loadHistory := flag.Bool("h", true, "Load history")
 	flag.Parse()
