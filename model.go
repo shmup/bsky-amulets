@@ -18,6 +18,7 @@ import (
 type Model struct {
 	stats       Stats
 	entries     []Entry
+	entryMap    map[string]Entry
 	maxEntries  *int
 	minRarity   *int
 	newestFirst bool
@@ -49,11 +50,23 @@ type HistoryMsg struct {
 	Entries []Entry
 }
 
+func mapToSlice(m map[string]Entry, maxEntries int) []Entry {
+	entries := make([]Entry, 0, len(m))
+	for _, entry := range m {
+		entries = append(entries, entry)
+	}
+	if len(entries) > maxEntries {
+		entries = entries[len(entries)-maxEntries:]
+	}
+	return entries
+}
+
 func NewModel(maxEntries, minRarity *int) Model {
 	v := viewport.New(80, 20)
 
 	m := Model{
 		viewport:    v,
+		entryMap:    make(map[string]Entry),
 		maxEntries:  maxEntries,
 		minRarity:   minRarity,
 		startTime:   time.Now(),
@@ -64,6 +77,11 @@ func NewModel(maxEntries, minRarity *int) Model {
 	go m.bufferWriter()
 
 	entries := loadHistoryFromFile(*minRarity, *maxEntries)
+	for _, entry := range entries {
+		m.entryMap[entry.Text] = entry
+	}
+	m.entries = mapToSlice(m.entryMap, *maxEntries)
+
 	m.stats.Amulets = 0
 	m.stats.TotalAmulets = len(entries)
 	m.entries = entries
@@ -180,12 +198,12 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		if isAmulet, rarity := amulet.IsAmulet(msg.Text); isAmulet {
 			if rarity >= *m.minRarity {
-				m.stats.Amulets++
-				m.stats.TotalAmulets++
 				entry := Entry{Text: msg.Text, Rarity: rarity, Time: time.Now()}
-				m.entries = append(m.entries, entry)
-				if len(m.entries) > *m.maxEntries {
-					m.entries = m.entries[len(m.entries)-*m.maxEntries:]
+				if _, exists := m.entryMap[msg.Text]; !exists {
+					m.entryMap[msg.Text] = entry
+					m.entries = mapToSlice(m.entryMap, *m.maxEntries)
+					m.stats.Amulets++
+					m.stats.TotalAmulets++
 				}
 			}
 		}
