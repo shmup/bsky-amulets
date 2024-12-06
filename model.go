@@ -19,7 +19,6 @@ type Model struct {
 	stats       Stats
 	entries     []Entry
 	entryMap    map[string]Entry
-	maxEntries  *int
 	minRarity   *int
 	newestFirst bool
 	startTime   time.Time
@@ -50,24 +49,20 @@ type HistoryMsg struct {
 	Entries []Entry
 }
 
-func mapToSlice(m map[string]Entry, maxEntries int) []Entry {
+func mapToSlice(m map[string]Entry) []Entry {
 	entries := make([]Entry, 0, len(m))
 	for _, entry := range m {
 		entries = append(entries, entry)
 	}
-	if len(entries) > maxEntries {
-		entries = entries[len(entries)-maxEntries:]
-	}
 	return entries
 }
 
-func NewModel(maxEntries, minRarity *int) Model {
+func NewModel(minRarity *int) Model {
 	v := viewport.New(80, 20)
 
 	m := Model{
 		viewport:    v,
 		entryMap:    make(map[string]Entry),
-		maxEntries:  maxEntries,
 		minRarity:   minRarity,
 		startTime:   time.Now(),
 		writeBuffer: make(chan Entry, 1000),
@@ -76,11 +71,11 @@ func NewModel(maxEntries, minRarity *int) Model {
 
 	go m.bufferWriter()
 
-	entries := loadHistoryFromFile(*minRarity, *maxEntries)
+	entries := loadHistoryFromFile(*minRarity)
 	for _, entry := range entries {
 		m.entryMap[entry.Text] = entry
 	}
-	m.entries = mapToSlice(m.entryMap, *maxEntries)
+	m.entries = mapToSlice(m.entryMap)
 
 	m.stats.Amulets = 0
 	m.stats.TotalAmulets = len(entries)
@@ -163,7 +158,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case "1", "2", "3", "4", "5", "6", "7":
 			newRarity := int(msg.String()[0] - '0') // convert char to int
 			*m.minRarity = newRarity
-			m.entries = loadHistoryFromFile(*m.minRarity, *m.maxEntries)
+			m.entries = loadHistoryFromFile(*m.minRarity)
 			m.stats.TotalAmulets = len(m.entries)
 			return m, nil
 		case "r":
@@ -201,7 +196,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				entry := Entry{Text: msg.Text, Rarity: rarity, Time: time.Now()}
 				if _, exists := m.entryMap[msg.Text]; !exists {
 					m.entryMap[msg.Text] = entry
-					m.entries = mapToSlice(m.entryMap, *m.maxEntries)
+					m.entries = mapToSlice(m.entryMap)
 					m.stats.Amulets++
 					m.stats.TotalAmulets++
 				}
@@ -230,7 +225,7 @@ func (m Model) logEntry(entry Entry) {
 	m.writeBuffer <- entry
 }
 
-func loadHistoryFromFile(minRarity, maxEntries int) []Entry {
+func loadHistoryFromFile(minRarity int) []Entry {
 	file, err := os.Open("amulets.json")
 	if err != nil {
 		return nil
@@ -252,10 +247,6 @@ func loadHistoryFromFile(minRarity, maxEntries int) []Entry {
 	sort.Slice(entries, func(i, j int) bool {
 		return entries[i].Time.Before(entries[j].Time)
 	})
-
-	if len(entries) > maxEntries {
-		entries = entries[:maxEntries]
-	}
 
 	return entries
 }

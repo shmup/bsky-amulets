@@ -49,13 +49,12 @@ func main() {
 	config := loadConfig()
 
 	minRarity := flag.Int("r", config.MinRarity, "Minimum rarity (1-7)")
-	maxEntries := flag.Int("n", config.MaxEntries, "Maximum entries")
 	flag.Parse()
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	m := NewModel(maxEntries, minRarity)
+	m := NewModel(minRarity)
 	p := tea.NewProgram(m, tea.WithAltScreen())
 
 	go startFirehose(ctx, p)
