@@ -8,6 +8,16 @@ import (
 	"github.com/charmbracelet/lipgloss"
 )
 
+func (m Model) View() string {
+	containerStyle := lipgloss.NewStyle().
+		Background(lipgloss.Color("0")).
+		Height(m.viewport.Height + 1)
+
+	return containerStyle.Render(fmt.Sprintf("%s\n%s",
+		m.renderStats(),
+		m.viewport.View()))
+}
+
 func getRaritySymbol(minRarity int) string {
 	rarityColors := map[int]string{
 		1: "173", // copper/bronze
