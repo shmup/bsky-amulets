@@ -29,10 +29,20 @@ func getRaritySymbol(minRarity int) string {
 		7: "252", // unknown
 	}
 
+	raritySymbols := map[int]string{
+		1: "C",
+		2: "U",
+		3: "R",
+		4: "E",
+		5: "L",
+		6: "M",
+		7: "?",
+	}
+
 	if color, exists := rarityColors[minRarity]; exists {
 		return lipgloss.NewStyle().
 			Foreground(lipgloss.Color(color)).
-			Render("•")
+			Render(raritySymbols[minRarity])
 	}
 	return "?"
 }
@@ -57,7 +67,7 @@ func (m Model) renderStats() string {
 	return stats
 }
 
-func (m Model) renderEntries() string {
+func (m *Model) renderEntries() string {
 	var output strings.Builder
 
 	timeStyle := lipgloss.NewStyle().
@@ -67,7 +77,20 @@ func (m Model) renderEntries() string {
 		Foreground(lipgloss.Color("252")).
 		Width(m.viewport.Width - 11)
 
+	dateHeaderStyle := lipgloss.NewStyle().
+		Bold(true).
+		Foreground(lipgloss.Color("252"))
+
+	var lastDate time.Time
+
 	for _, e := range m.entries {
+		// Check if the date has changed
+		if e.Time.Day() != lastDate.Day() || e.Time.Month() != lastDate.Month() || e.Time.Year() != lastDate.Year() {
+			dateHeader := dateHeaderStyle.Render(e.Time.Format("January 2, 2006")) // Format the date
+			output.WriteString(dateHeader + "\n")
+			lastDate = e.Time
+		}
+
 		symbol := getRaritySymbol(e.Rarity)
 		timeStr := e.Time.Format("15:04:05")
 		formattedTime := timeStyle.Render(timeStr)
