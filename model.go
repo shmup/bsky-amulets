@@ -1,6 +1,7 @@
 package main
 
 import (
+	"strings"
 	"time"
 
 	"github.com/charmbracelet/bubbles/viewport"
@@ -68,7 +69,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.entries = msg.Entries
 	}
 
-	m.viewport.SetContent(m.renderEntries())
+	m.viewport.SetContent(strings.TrimSpace(m.renderEntries()))
+
 	return m, nil
 }
 
@@ -86,14 +88,24 @@ func (m Model) handleProcessMsg(msg ProcessMsg) (tea.Model, tea.Cmd) {
 				m.stats.Amulets++
 				m.stats.TotalAmulets++
 				m.writeBuffer <- entry
+				m.viewport.SetContent(m.renderEntries())
+				if m.newestFirst {
+					m.viewport.GotoTop()
+				} else {
+					m.viewport.GotoBottom()
+				}
 			}
 		}
 	}
 	return m, nil
 }
 
-func (m Model) handleKeyPress(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
+func (m *Model) handleKeyPress(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	switch msg.String() {
+	case "[":
+		m.scrollToPreviousDay()
+	case "]":
+		m.scrollToNextDay()
 	case "j":
 		m.viewport.LineDown(1)
 	case "k":
@@ -105,8 +117,22 @@ func (m Model) handleKeyPress(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	case "1", "2", "3", "4", "5", "6", "7":
 		newRarity := int(msg.String()[0] - '0')
 		*m.minRarity = newRarity
-		m.entries = loadHistoryFromFile(*m.minRarity)
+
+		m.entryMap = make(map[string]Entry)
+		loadedEntries := loadHistoryFromFile(*m.minRarity)
+		for _, entry := range loadedEntries {
+			m.entryMap[entry.Text] = entry
+		}
+		m.entries = mapToSlice(m.entryMap, m.newestFirst)
+
 		m.stats.TotalAmulets = len(m.entries)
+		m.stats.Amulets = len(m.entries)
+		m.viewport.SetContent(m.renderEntries())
+		if m.newestFirst {
+			m.viewport.GotoTop()
+		} else {
+			m.viewport.GotoBottom()
+		}
 	case "ctrl+d":
 		m.viewport.LineDown(10)
 	case "ctrl+u":
@@ -114,9 +140,42 @@ func (m Model) handleKeyPress(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	case "r":
 		m.newestFirst = !m.newestFirst
 		m.entries = mapToSlice(m.entryMap, m.newestFirst)
+		m.viewport.SetContent(m.renderEntries())
+		m.viewport.GotoTop()
 	case "q", "ctrl+c":
 		return m, tea.Quit
 	}
 
 	return m, nil
+}
+
+func (m *Model) scrollToNextDay() {
+	currentOffset := m.viewport.YOffset
+	currentLine := 0
+	for _, line := range strings.Split(m.viewport.View(), "\n") {
+		if strings.HasPrefix(line, "January") || strings.HasPrefix(line, "February") || strings.HasPrefix(line, "March") || strings.HasPrefix(line, "April") || strings.HasPrefix(line, "May") || strings.HasPrefix(line, "June") || strings.HasPrefix(line, "July") || strings.HasPrefix(line, "August") || strings.HasPrefix(line, "September") || strings.HasPrefix(line, "October") || strings.HasPrefix(line, "November") || strings.HasPrefix(line, "December") {
+			if currentLine > currentOffset {
+				m.viewport.SetYOffset(currentLine)
+				return
+			}
+		}
+		currentLine++
+	}
+}
+
+func (m *Model) scrollToPreviousDay() {
+	currentOffset := m.viewport.YOffset
+	currentLine := 0
+	var previousDayOffset int
+	for _, line := range strings.Split(m.viewport.View(), "\n") {
+		if strings.HasPrefix(line, "January") || strings.HasPrefix(line, "February") || strings.HasPrefix(line, "March") || strings.HasPrefix(line, "April") || strings.HasPrefix(line, "May") || strings.HasPrefix(line, "June") || strings.HasPrefix(line, "July") || strings.HasPrefix(line, "August") || strings.HasPrefix(line, "September") || strings.HasPrefix(line, "October") || strings.HasPrefix(line, "November") || strings.HasPrefix(line, "December") {
+			if currentLine >= currentOffset {
+				m.viewport.SetYOffset(previousDayOffset)
+				return
+			}
+			previousDayOffset = currentLine
+		}
+		currentLine++
+	}
+	m.viewport.SetYOffset(previousDayOffset)
 }
